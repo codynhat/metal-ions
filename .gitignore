@@ -1,0 +1,4 @@
+*.pyc
+blast_results
+pipeline_results
+blast.out
