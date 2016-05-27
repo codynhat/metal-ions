@@ -8,18 +8,18 @@ from multiprocessing import Process
 
 Entrez.email = "chatfiel@uoregon.edu"
 
-def blast_search(filename):
+def blast_search(filename, blast_temp_path):
     '''
         Perform a blast search, using a file as input. Either FASTA or accession number
 
         Return results as list of accession numbers and locations
     '''
 
-    filepath = "./blast_results/%s.xml" % filename
+    filepath = "%s/%s.xml" % (blast_temp_path, filename)
     if not os.path.exists(filepath):
-        with open('./blast_results/%s' % filename, 'w') as f:
+        with open('%s/%s' % (blast_temp_path, filename), 'w') as f:
             f.write(filename)
-        search_cmd = NcbitblastnCommandline(query='./blast_results/%s' % filename,  db="/research/sequences/GenBank/blast/db/refseq_genomic", outfmt=5, out=filepath)
+        search_cmd = NcbitblastnCommandline(query='%s/%s' % (blast_temp_path, filename),  db="/research/sequences/GenBank/blast/db/refseq_genomic", outfmt=5, out=filepath)
         subprocess.call(str(search_cmd), shell=True)
 
     result = SearchIO.read(filepath, 'blast-xml')
@@ -76,14 +76,14 @@ def write_sequences(sequences, filename):
     SeqIO.write(sequences, output_handle, "fasta")
     output_handle.close()
 
-def run_pipeline(line):
+def run_pipeline(line, blast_temp_path, outpath):
     '''
         Run pipeline for accession number
     '''
         
     # Perform blast search
     print("%s - START" % line)
-    blast_results = blast_search(line)
+    blast_results = blast_search(line, blast_temp_path)
     print("%s - found %d results after filter" % (line, len(blast_results)))
 
     # Get upstream sequences
@@ -101,13 +101,16 @@ def run_pipeline(line):
         
     # Write to FASTA line
     print("%s - writing FASTA file" % line)
-    write_sequences(upstreams, "pipeline_results/%s.fasta" % line)
+    write_sequences(upstreams, outpath)
 
 def main():
+    blast_temp_path = sys.argv[1] if len(sys.argv) > 1 else './blast_results'
+    outpath = sys.argv[2] if len(sys.argv) > 2 else './blast.out'
+	
     processes = []
     for line in sys.stdin:
         line = line.replace('\n', '')
-        p = Process(target=run_pipeline, args=(line,))
+        p = Process(target=run_pipeline, args=(line,blast_temp_path,outpath,))
         p.start()
         processes.append(p)
     for p in processes:    

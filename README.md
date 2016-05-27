@@ -4,26 +4,17 @@ This script is meant to be run on ACISS with standalone BLAST. The path to the l
 
 ## Setup
 
-Before executing the script, a few directories need to be created. These can be created by executing the following:
-
-```
-mkdir -v blast_results
-mkdir -v pipeline_results
-```
-
-The directory `blast_results` is where the results for blast queries are stored as XML documents. The directory `pipeline_results` contains the final output as multi FASTA files. Each file is named after the original query accession number.
+Before executing the script, a few paths need to be set. There is one directory where BLAST will output temporary XML files to be used by Entrez. This is the `BLAST_TEMP_PATH` in the `aciss.sh` script. The another path is the location of the final FASTA output. This is `OUTPUT_PATH` in `aciss.sh`. Set these paths as needed, or keep them as the default.
 
 ## Usage
 
-The script, `aciss.sh` can be used to run the pipeline on aciss. The file `test.txt` is an example of input that is accepted by the script. Each line is a separate accession number to run through the pipeline. To start a new pipeline, create a new file with a list of accession numbers and replace the reference to `test.txt` in the `aciss.sh` script.
+The script, `aciss.sh` can be used to run the pipeline on aciss. The file `test.txt` is an example of input that is accepted by the script. Each line is a separate accession number to run through the pipeline. To start a new pipeline, create a new file with a list of accession numbers and set the envornment variable `INPUT_FILE` in the `aciss.sh` script, appropriately. This path can be absolute, or relative to the directory where `aciss.sh` is located.
 
 To run the script on aciss:
 
 ```
 qsub -q generic aciss.sh
 ```
-
-The final output will be located in `pipeline_results/`. Any logging output is redirected to `./blast.out`.
 
 ## Notes
 
