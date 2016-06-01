@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from multiprocessing import Process
+from clustering import cluster_BLAST_output as cluster
 
 Entrez.email = "chatfiel@uoregon.edu"
 
@@ -76,11 +77,11 @@ def write_sequences(sequences, filename):
     SeqIO.write(sequences, output_handle, "fasta")
     output_handle.close()
 
-def run_pipeline(line, blast_temp_path, outpath):
+def run_pipeline(line, blast_temp_path, outpath, cluster_size):
     '''
         Run pipeline for accession number
     '''
-        
+
     # Perform blast search
     print("%s - START" % line)
     blast_results = blast_search(line, blast_temp_path)
@@ -94,29 +95,34 @@ def run_pipeline(line, blast_temp_path, outpath):
     for result in blast_results:
         upstream = get_upstream_sequence(result[0], result[1], result[2])
         if upstream:
-	    print("%s - upstream %d/%d found" % (line, c, num_results))	
+	    print("%s - upstream %d/%d found" % (line, c, num_results))
             upstreams.append(upstream)
         c += 1
     print("%s - found %d upstream sequences" % (line, len(upstreams)))
-        
+
     # Write to FASTA line
     print("%s - writing FASTA file" % line)
     write_sequences(upstreams, outpath)
 
+    # clustering
+    print("%s - Starting Clustering" % line)
+    cluster(outpath, cluster_size=)
+    print("%s - Clustering Finished" % line)
+
 def main():
     blast_temp_path = sys.argv[1] if len(sys.argv) > 1 else './blast_results'
     outpath = sys.argv[2] if len(sys.argv) > 2 else './blast.out'
-	
+    cluster_size = int(sys.argv[3]) if len(sys.argv) > 3 else 23
+
     processes = []
     for line in sys.stdin:
         line = line.replace('\n', '')
-        p = Process(target=run_pipeline, args=(line,blast_temp_path,outpath,))
+        p = Process(target=run_pipeline, args=(line,blast_temp_path,outpath,cluster_size,))
         p.start()
         processes.append(p)
-    for p in processes:    
+    for p in processes:
         p.join()
 
 
 if __name__ == '__main__':
     main()
-
