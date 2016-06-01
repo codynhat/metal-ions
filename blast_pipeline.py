@@ -77,7 +77,7 @@ def write_sequences(sequences, filename):
     SeqIO.write(sequences, output_handle, "fasta")
     output_handle.close()
 
-def run_pipeline(line, blast_temp_path, outpath, cluster_size):
+def run_pipeline(line, blast_temp_path, cluster_size):
     '''
         Run pipeline for accession number
     '''
@@ -102,22 +102,22 @@ def run_pipeline(line, blast_temp_path, outpath, cluster_size):
 
     # Write to FASTA line
     print("%s - writing FASTA file" % line)
+    outpath = "%s.fasta" % line
     write_sequences(upstreams, outpath)
 
     # clustering
     print("%s - Starting Clustering" % line)
-    cluster(outpath, cluster_size=)
+    cluster(outpath, cluster_size)
     print("%s - Clustering Finished" % line)
 
 def main():
     blast_temp_path = sys.argv[1] if len(sys.argv) > 1 else './blast_results'
-    outpath = sys.argv[2] if len(sys.argv) > 2 else './blast.out'
-    cluster_size = int(sys.argv[3]) if len(sys.argv) > 3 else 23
+    cluster_size = int(sys.argv[2]) if len(sys.argv) > 2 else 23
 
     processes = []
     for line in sys.stdin:
         line = line.replace('\n', '')
-        p = Process(target=run_pipeline, args=(line,blast_temp_path,outpath,cluster_size,))
+        p = Process(target=run_pipeline, args=(line,blast_temp_path,cluster_size,))
         p.start()
         processes.append(p)
     for p in processes:

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 BLAST_TEMP_PATH='./blast_results'
-OUTPUT_PATH='./blast.fasta'
-INPUT_FILE='test.txt'
+INPUT_FILE='test1.txt'
 CLUSTER_SIZE=23
 
-python blast_pipeline.py $BLAST_TEMP_PATH $OUTPUT_PATH $CLUSTER_SIZE < $INPUT_FILE
+python blast_pipeline.py $BLAST_TEMP_PATH $CLUSTER_SIZE < $INPUT_FILE
