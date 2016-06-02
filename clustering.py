@@ -3,20 +3,28 @@ from Bio.Align.Applications import ClustalOmegaCommandline
 
 def cluster_BLAST_output(fasta_in, cluster_size):
     """
-        Cluster sequences using a FASTA file as input.
+        Cluster sequences in a multi-FASTA file (fasta_in) based on similarity.
 
-        Returns FASTA files containing sequences from each cluster.
+        Specify preferred cluster size (cluster_size).
+
+        Returns a multi-FASTA file for each cluster.
 
     """
-
+    
     # Pass inputs to ClustalOmega
     accession = ".".join(fasta_in.split(".")[0:-1])
     cluster_out = "{}.{}".format(accession, "aux")
     cline = ClustalOmegaCommandline(infile=fasta_in, clusteringout=cluster_out, clustersize=cluster_size)
     cline()
 
+    # Check that fasta_in has sufficient number of sequences for clustering
+    try:
+        clust_file = open(cluster_out, "r")
+    except FileNotFoundError:
+        print("The FASTA input has too few sequences for the given cluster size.")
+        return
+
     # Read cluster_out file, append accessions to cluster dictionary
-    clust_file = open(cluster_out, "r")
     clusters = {}
     for line in clust_file.readlines():
         line = line.split()
@@ -34,4 +42,4 @@ def cluster_BLAST_output(fasta_in, cluster_size):
         output_handle.close()
 
 if __name__ == '__main__':
-    cluster_BLAST_output("ABJ55467.1.fasta", 23)
+    cluster_BLAST_output("ABC93653.1.fasta", 23)

@@ -102,16 +102,16 @@ def run_pipeline(line, blast_temp_path, outdir, cluster_size):
 
     # Write to FASTA line
     print("%s - writing FASTA file" % line)
-    outpath = "%s/%s.fasta" % (outdir, line)
-    write_sequences(upstreams, outpath)
+    outpath = "%s/%s" % (outdir, line)
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+
+    fasta_path = "%s/%s.fasta" % (outpath, line)
+    write_sequences(upstreams, fasta_path)
 
     # clustering
-    cluster_path = "%s/clusters" % outpath
-    if not os.path.exists(cluster_path):
-        os.makedirs(cluster_path)
-
     print("%s - Starting Clustering" % line)
-    cluster("%s/%s.fasta" % (cluster_path, line), cluster_size)
+    cluster(fasta_path, cluster_size)
     print("%s - Clustering Finished" % line)
 
 def main():
