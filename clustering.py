@@ -19,8 +19,8 @@ def cluster_BLAST_output(fasta_in, cluster_size):
 
     # Check that fasta_in has sufficient number of sequences for clustering
     try:
-        clust_file = open(cluster_out, "r")
-    except FileNotFoundError:
+    	clust_file = open(cluster_out, "r")
+    except IOError:
         print("The FASTA input has too few sequences for the given cluster size.")
         return
 
