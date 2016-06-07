@@ -11,7 +11,7 @@ Here are the necessary steps to get started.
 ```
 qsub -q generic aciss.sh
 ```
-5. When complete, the results will appear in `OUTPUT_PATH`.
+When complete, the results will appear in `OUTPUT_PATH`.
 
 ## Requirements
 
