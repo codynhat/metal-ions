@@ -1,39 +1,46 @@
-# BLAST Pipeline
+# Full Pipeline
 
 ## Quick Start
+## To run full pipeline:
 
 Here are the necessary steps to get started.
 
 1. Create `BLAST_TEMP_PATH` and `OUTPUT_PATH` directories (see below).
 2. Set `INPUT_FILE` in `run.sh` to appropriate input file. This file should be a text file with a list of accession numbers. One accession number on each line. See `test.txt` for an example.
-3. Set the `DIR` variable in `aciss.sh` to the location of this repo.
+3. Set variables in run.sh. Variables to be set are 'BLAST_TEMP_PATH', 'OUTPUT_PATH', 'CM', 'INPUT_FILE', and 'CLUSTER_SIZE'. Each of these is explained below in 'Setup'.
 4. Start the script on ACISS by running:
 ```
-qsub -q generic aciss.sh
+qsub -q generic run.sh
 ```
-When complete, the results will appear in `OUTPUT_PATH`.
 
 ## Requirements
 
-This script is meant to be run on ACISS with standalone BLAST. The path to the local BLAST database is hardcoded in the script.
+This script is meant to be run on ACISS with standalone BLAST. The path to the local BLAST database is hardcoded in the script, but can be modified to be loaded manually
+This script also requires CMfinder, infernal, Python/2.7, and clustal-omega. These are all currently set to be loaded on aciss within the script, however if one was to attempt to use this elsewhere these programs would need to be installed.
 
 ## Setup
 
-Before executing the script, a few paths need to be set. There is one directory where BLAST will output temporary XML files to be used by Entrez. This is the `BLAST_TEMP_PATH` in the `run.sh` script. The another path is the location of the final FASTA output. This is `OUTPUT_PATH` in `run.sh`. Set these paths as needed, or keep them as the default. Make sure the folders are created before running the script.
+Before executing the script, a few paths need to be set. There is one directory where BLAST will output temporary XML files to be used by Entrez. This is the `BLAST_TEMP_PATH` in the `run.sh` script. The another path is the location of the final FASTA output. This is `OUTPUT_PATH` in `run.sh`. Set these paths as needed, or keep them as the default. The default is your root directory. Make sure the folders are created before running the script.
+INPUT_PATH needs to be set to your list of accession numbers. CM should be set to your pre-compiled CM database. If you do not have a CM database and do not wish to use the provided riboswitch CM database, see readme_build_cmdatabase.txt
+Lastly, CLUSTER_SIZE can be modified to adjust the size of the clusters made.
 
 ## Usage
 
-The script, `aciss.sh` can be used to run the pipeline on aciss. The file `test.txt` is an example of input that is accepted by the script. Each line is a separate accession number to run through the pipeline. To start a new pipeline, create a new file with a list of accession numbers and set the environment variable `INPUT_FILE` in the `run.sh` script, appropriately. This path can be absolute, or relative to the directory where `aciss.sh` is located.
+The file `test.txt` is an example of input that is accepted by the script. Each line is a separate accession number to run through the pipeline. To start a new pipeline, create a new file with a list of one or more accession numbers and set the environment variable `INPUT_FILE` in the `run.sh` script, appropriately.
 
 To run the script on aciss:
 
 ```
-qsub -q generic aciss.sh
+qsub -q generic run.sh
+
+##When running more than 1 accession number, qsub -q fatnodes run.sh is recommended
+
 ```
 
 ## Output
 
 The output of the BLAST pipeline will create a new directory in `OUTPUT_PATH` for each accession number. Each directory will contain a multi-FASTA file of matched results from the BLAST pipeline. The directory also contains .fasta files for the clusters (see Cluster function below for more details).
+Motif files will also be produced for each cluster. These will be collapsed into stockholm files for each cluster. Lastly, an alignment file will be output for each cluster. This alignment file will show the sequences retrieved from the blast search grouped into similar sequences/structures, then mapped against known RNA structures as annotated in the provided CM database
 
 ### Example Output Format
 
@@ -45,7 +52,7 @@ CAC83722.1/
 
 P69380.1/
   P69380.1.aux              
-  P69380.1_cluster_1.fasta  
+  P69380.1_cluster_1.fasta
   P69380.1_cluster_3.fasta  
   P69380.1_cluster_5.fasta  
   P69380.1_cluster_7.fasta  
@@ -74,21 +81,4 @@ To use multiple cores on ACISS, a few arguments should be added to the command l
 qsub -q generic -l nodes=1:ppn=4 aciss.sh
 ```
 
-Multiple nodes may also be used for large queries.
-
-
-# Clustering function
-
-## Requirements
-The clustering function requires BioPython, stand-alone Clustal Omega, and argtable2.
-
-## Usage
-This function was designed to cluster the upstream 500-bp sequences of homologous cation efflux pump genes, given a multi-FASTA file `fasta_in` containing sequences and a desired cluster size `cluster_size`. It has been integrated into the `blast_pipeline.py` script. To use the clustering function alone:
-
-```
-cluster_BLAST_output(fasta_in, cluster_size)
-```
-The multi-FASTA clusters that the function writes and outputs will be delivered to the working directory when using the stand-alone clustering function.
-
-## Notes
-We ran in to that trouble when the BLAST pipeline multi-FASTA output had too few sequences to cluster when the desired cluster size was too large. It should give clusters for inputs that are large enough to generate clusters of the size recommended for CMfinder. When you ask Clustal Omega to cluster a multi-FASTA input containing, say, 3 sequences into clusters containing 23 sequences each, Clustal won’t cluster them, nor produce an auxiliary clustering file, which is what is used as a reference to write the clustered multi-FASTAs. This would then cause an IO exception.
+Multiple nodes may also be used for large queries. THe maximum number of nodes currently available on the University of Oregon's aciss is 12 nodes (2016-06-07)
