@@ -1,15 +1,17 @@
 #!/bin/bash
 
-BLAST_TEMP_PATH='/home7/ereister/Bioinformatics_Spring2016/blast_results'
-OUTPUT_PATH='/home7/ereister/Bioinformatics_Spring2016/pipeline_results'
-INPUT_FILE='/home7/ereister/Bioinformatics_Spring2016/raw_data/test.txt'
+BLAST_TEMP_PATH='./blast_results'
+OUTPUT_PATH='./pipeline_results'
+INPUT_FILE='./test.txt'
 CLUSTER_SIZE=23
 CM='/home7/ereister/Bioinformatics_Spring2016/motifs/cmdatabase.cm'
 
-python blast_and_clustering/blast_pipeline.py $BLAST_TEMP_PATH $OUTPUT_PATH $CLUSTER_SIZE < $INPUT_FILE
-
+module load python
+module load blast
 module load CMfinder
 module load infernal/1.1.1
+
+python blast_and_clustering/blast_pipeline.py $BLAST_TEMP_PATH $OUTPUT_PATH $CLUSTER_SIZE < $INPUT_FILE
 
 ##Run first round of CMfinder
 cd $OUTPUT_PATH
